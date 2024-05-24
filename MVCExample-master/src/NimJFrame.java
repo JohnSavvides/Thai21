@@ -11,28 +11,34 @@ public class NimJFrame extends javax.swing.JFrame {
 
     private int gameState;
     private int whoseTurn;
+    private final String difficulty;
+    private final boolean playingCPU;
+    private int totalScore;
     /**
      * Creates new form NimJFrame
      */
-    public NimJFrame() {
+    public NimJFrame(String dif) {
         initComponents();
         
+        this.difficulty = dif;
+        this.playingCPU = !this.difficulty.equals(Constants.PVP);
         this.newGame();
     }
 
     public void newGame() {
+        this.totalScore = Constants.INITIAL_PILE_SIZE;
         this.gameState = Constants.IN_PLAY;
-        this.lblScore.setText(""+Constants.INITIAL_PILE_SIZE);
+        this.lblScore.setText(""+this.totalScore);
         this.lblTurn.setText("Player 1's turn");
         this.whoseTurn = Constants.P1TURN;
+        if (difficulty.equals(Constants.HARD)) {
+            cpuMakeMove();
+        }
     }
     
     private void checkForWinner() {
-        int winner = -1;
-        if (Integer.parseInt(lblScore.getText()) == 0) {
-            winner = whoseTurn;
-        }
-        if (winner != -1) {
+        if (this.totalScore == 0) {
+            int winner = whoseTurn;
             lblTurn.setText("Player "+winner+" wins!");
             this.gameState = winner;
         }
@@ -43,6 +49,40 @@ public class NimJFrame extends javax.swing.JFrame {
         lblTurn.setText("Player "+this.whoseTurn+"'s turn");
     }
     
+    private void checkForWinnerAndUpdateTurn() {
+        this.checkForWinner();
+        if (this.gameState == Constants.IN_PLAY) {
+            this.updateTurn();
+        }
+    }
+    
+    private int moveToWin() {
+        if (totalScore % 4 == 0) {
+            return 1+(int)(Math.random()*3);
+        } else {
+            return totalScore % 4;
+        } 
+    }
+    
+    private void cpuMakeMove() {
+        int score = 0;
+        int multiply = 3;
+        if (this.totalScore < 3) {
+            multiply = this.totalScore;
+        }
+        if (this.difficulty.equals(Constants.EASY)) {
+            score = 1+(int)(Math.random()*multiply);
+        } else {
+            score = moveToWin();
+        }
+        this.updateScore(score);
+        this.checkForWinnerAndUpdateTurn();
+    }
+    
+    private void updateScore(int scoreToRemove) {
+        this.totalScore = this.totalScore - scoreToRemove;
+        lblScore.setText(""+this.totalScore);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -54,6 +94,7 @@ public class NimJFrame extends javax.swing.JFrame {
 
         lblTurn = new javax.swing.JLabel();
         lblScore = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
@@ -64,12 +105,15 @@ public class NimJFrame extends javax.swing.JFrame {
 
         lblScore.setText("jLabel1");
 
+        jPanel1.setLayout(new java.awt.GridLayout(1, 0, 7, 0));
+
         jButton1.setText("1");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnClicked(evt);
             }
         });
+        jPanel1.add(jButton1);
 
         jButton2.setText("2");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -77,6 +121,7 @@ public class NimJFrame extends javax.swing.JFrame {
                 btnClicked(evt);
             }
         });
+        jPanel1.add(jButton2);
 
         jButton3.setText("3");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -84,42 +129,36 @@ public class NimJFrame extends javax.swing.JFrame {
                 btnClicked(evt);
             }
         });
+        jPanel1.add(jButton3);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(60, 60, 60)
-                .addComponent(jButton1)
-                .addGap(108, 108, 108)
-                .addComponent(jButton2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 132, Short.MAX_VALUE)
-                .addComponent(jButton3)
-                .addGap(28, 28, 28))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(lblTurn)
-                        .addGap(150, 150, 150))
+                        .addComponent(lblTurn, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(126, 126, 126))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(lblScore)
-                        .addGap(171, 171, 171))))
+                        .addComponent(lblScore, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(104, 104, 104))))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(28, 28, 28)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 331, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 24, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(lblTurn)
-                .addGap(73, 73, 73)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3))
-                .addGap(47, 47, 47)
+                .addGap(20, 20, 20)
+                .addComponent(lblTurn, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(lblScore, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(73, Short.MAX_VALUE))
+                .addContainerGap(38, Short.MAX_VALUE))
         );
 
         pack();
@@ -128,14 +167,12 @@ public class NimJFrame extends javax.swing.JFrame {
     private void btnClicked(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClicked
         // TODO add your handling code here:
         javax.swing.JButton btn = (javax.swing.JButton) evt.getSource();
-        int btnVal = Integer.parseInt(btn.getText());
-        int curScore = Integer.parseInt(lblScore.getText());
-        if (curScore >= btnVal) {
-            int newScore = curScore - btnVal;
-            lblScore.setText(""+newScore);
-            this.checkForWinner();
-            if (this.gameState == Constants.IN_PLAY) {
-                this.updateTurn();
+        int btnScore = Integer.parseInt(btn.getText());
+        if (btnScore <= this.totalScore) {
+            this.updateScore(btnScore);
+            this.checkForWinnerAndUpdateTurn();
+            if (playingCPU && this.gameState == Constants.IN_PLAY) {
+                cpuMakeMove();
             }
         }
     }//GEN-LAST:event_btnClicked
@@ -145,6 +182,7 @@ public class NimJFrame extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblScore;
     private javax.swing.JLabel lblTurn;
     // End of variables declaration//GEN-END:variables
